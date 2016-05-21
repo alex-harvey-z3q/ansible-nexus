@@ -1,8 +1,6 @@
 ---
-# tasks file for ansible-nexus
 - name: Download nexus_package 
   get_url: url=http://download.sonatype.com/nexus/oss/{{ nexus_package }} dest="{{ nexus_download_dir }}/{{ nexus_package }}"
-  tags: download
   sudo: no
 
 - name: Ensure Nexus o/s group exists
@@ -31,14 +29,12 @@
     owner={{ nexus_os_user }}
     group={{ nexus_os_group }}
     mode="0755"
-  tags: unpack
 
 - name: Update symlink nexus-latest
   shell: ln -fs `ls -d {{ nexus_installation_dir }}/nexus-*|tail -1` {{ nexus_installation_dir }}/nexus-latest
 
 - name: Install createrepo for nexus-yum-repository-plugin
   yum: name=createrepo state=installed
-  when: ansible_os_family == "RedHat"
 
 - name: Check if sonatype working directory exists
   stat: path="{{ nexus_installation_dir }}/sonatype-work"
@@ -107,15 +103,12 @@
 
 - name: Copy the /etc/init.d/nexus file
   template: src=init-nexus.j2 dest=/etc/init.d/nexus owner=root group=root mode=0755 backup=yes
-  when: ansible_os_family == "RedHat"
   notify:
     - 'restart nexus'
 
 - name: Register service with chkconfig system
   service: name=nexus enabled=yes
-  when: ansible_os_family == "RedHat"
 
 - name: Set service start/stop order
   sudo: yes
   command: chkconfig nexus reset
-  when: ansible_os_family == "RedHat"

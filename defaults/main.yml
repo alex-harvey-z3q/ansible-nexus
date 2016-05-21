@@ -1,12 +1,10 @@
 ---
-# defaults file for ansible-nexus
 nexus_download_dir: '/tmp'
-nexus_version: 'latest'
-#nexus_version: '2.10.0-02'
+nexus_version: '2.13.0-01'
 nexus_package: 'nexus-{{ nexus_version }}-bundle.tar.gz'
 nexus_installation_dir: '/usr/share'
 nexus_working_dir: '/var/nexus'
-nexus_port: 9999
+nexus_port: 8082
 nexus_create_os_user: true
 nexus_os_user: 'nexus'
 nexus_create_os_group: "{{ nexus_create_os_user | bool }}"
