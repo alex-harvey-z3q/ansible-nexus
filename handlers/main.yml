@@ -1,4 +1,4 @@
 ---
 - name: 'restart nexus'
-  sudo: yes
+  become: true
   service: name=nexus state=restarted
