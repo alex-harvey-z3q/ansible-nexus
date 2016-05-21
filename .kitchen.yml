@@ -1,0 +1,22 @@
+---
+driver:
+  name: docker
+  driver_config:
+#    http_proxy: http://192.168.1.3:3128
+#    https_proxy: http://192.168.1.3:3128
+
+provisioner:
+  name: ansible_playbook
+  hosts: test-kitchen
+  ansible_verbose: true
+  ansible_verbosity: 2
+  require_ansible_repo: false
+  require_ansible_omnibus: true
+#  http_proxy: http://192.168.1.3:3128
+#  https_proxy: http://192.168.1.3:3128
+
+platforms:
+  - name: centos-7.2
+
+suites:
+  - name: default
