@@ -1,8 +1,4 @@
 ---
-- name: 'start nexus'
-  sudo: yes
-  service: name=nexus state=started
-
 - name: 'restart nexus'
   sudo: yes
   service: name=nexus state=restarted
