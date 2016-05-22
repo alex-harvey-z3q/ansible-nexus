@@ -1,4 +1,5 @@
 ---
 - hosts: test-kitchen
   roles:
+  - geerlingguy.java
   - ansible-nexus
