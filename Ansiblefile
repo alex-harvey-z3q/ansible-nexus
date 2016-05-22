@@ -1,0 +1,2 @@
+site 'https://galaxy.ansible.com/api/v1'
+role 'geerlingguy.java'

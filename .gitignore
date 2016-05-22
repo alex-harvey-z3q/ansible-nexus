@@ -1,3 +1,6 @@
 .kitchen/
 .kitchen.local.yml
 Gemfile.lock
+.librarian
+tmp/
+Ansiblefile.lock
