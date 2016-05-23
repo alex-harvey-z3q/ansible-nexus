@@ -5,8 +5,6 @@ nexus_package: 'nexus-{{ nexus_version }}-bundle.tar.gz'
 nexus_installation_dir: '/usr/share'
 nexus_working_dir: '/var/nexus'
 nexus_port: 8082
-nexus_create_os_user: true
 nexus_os_user: 'nexus'
-nexus_create_os_group: "{{ nexus_create_os_user | bool }}"
 nexus_os_group: 'nexus'
 nexus_os_user_shell: '/bin/bash'

@@ -4,6 +4,12 @@ set :backend, :exec
 
 nexus_version = '2.13.0-01'
 
+['wget', 'createrepo'].each do |pkg|
+  describe package(pkg) do
+    it { is_expected.to be_installed }
+  end
+end
+
 describe group('nexus') do
   it { is_expected.to exist }
 end
@@ -26,10 +32,6 @@ end
     it { is_expected.to be_owned_by 'nexus' }
     it { is_expected.to be_grouped_into 'nexus' }
   end
-end
-
-describe package('createrepo') do
-  it { is_expected.to be_installed }
 end
 
 describe file('/etc/init.d/nexus') do
