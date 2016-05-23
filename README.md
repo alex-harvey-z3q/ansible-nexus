@@ -33,7 +33,7 @@ MIT.
 
 ## Acknowledgements
 
-This module was forked from jhenrichsen.nexus which was derived from a playbook by Alexander Ramos Jardim.
+This module was forked from `jhinrichsen.nexus` which the author acknowledges as derived from a playbook by Alexander Ramos Jardim.
 
 ## Contributing
 
