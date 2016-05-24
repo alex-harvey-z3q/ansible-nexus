@@ -2,6 +2,9 @@
 driver:
   name: docker
 
+platforms:
+  - name: centos-7.2
+
 provisioner:
   name: ansible_playbook
   hosts: test-kitchen
@@ -16,9 +19,6 @@ provisioner:
 
 verifier:
   name: serverspec
-
-platforms:
-  - name: centos-7.2
 
 suites:
   - name: default
