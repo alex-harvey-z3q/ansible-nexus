@@ -12,6 +12,7 @@ provisioner:
   ansible_verbosity: 2
   require_ansible_repo: false
   require_ansible_omnibus: true
+#  ansible_version: 1.9.6
   require_chef_for_busser: false
   requirements_path: requirements.yml
   extra_vars:
