@@ -5,13 +5,13 @@ driver:
 platforms:
   - name: centos-7.2
     driver_config:
+      image: ansible/centos7-ansible:stable
+      platform: centos
       provision_command:
         - yum -y install iproute
         - yum -y install net-tools
       forward:
         - 8082:8082
-      image: ansible/centos7-ansible:stable
-      platform: centos
 
 provisioner:
   name: ansible_playbook
@@ -20,7 +20,7 @@ provisioner:
   ansible_verbosity: 2
   require_ansible_repo: false
   require_ansible_omnibus: true
-#  ansible_version: 1.9.6
+  ansible_version: 1.9.6
   require_chef_for_busser: false
   requirements_path: requirements.yml
   extra_vars:
