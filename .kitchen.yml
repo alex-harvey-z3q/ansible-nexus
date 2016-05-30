@@ -5,6 +5,9 @@ driver:
 platforms:
   - name: centos-7.2
     driver_config:
+      provision_command:
+        - yum -y install iproute
+        - yum -y install net-tools
       image: ansible/centos7-ansible:stable
       platform: centos
 

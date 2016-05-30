@@ -1,7 +1,4 @@
 ---
 - hosts: test-kitchen
-  pre_tasks:
-  - yum: name=iproute state=installed
   roles:
-  - geerlingguy.java
   - ansible-nexus
