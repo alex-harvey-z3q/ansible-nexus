@@ -1,97 +1,165 @@
 ---
-- name: Install wget
-  yum: name=wget state=installed
+- name: Validate supported platform
+  ansible.builtin.assert:
+    that:
+      - ansible_os_family == "RedHat"
+      - ansible_distribution_major_version in ["9", "10"]
+      - ansible_service_mgr == "systemd"
+      - nexus_architecture in ["x86_64", "aarch_64"]
+    fail_msg: >-
+      This role supports systemd-based Enterprise Linux 9/10 hosts on x86_64 or
+      AArch64. Detected {{ ansible_distribution }} {{ ansible_distribution_version }},
+      service manager {{ ansible_service_mgr }}, architecture {{ ansible_architecture }}.
 
-- name: Install createrepo for nexus-yum-repository-plugin
-  yum: name=createrepo state=installed
+- name: Install Nexus prerequisites
+  ansible.builtin.dnf:
+    name: "{{ nexus_packages }}"
+    state: present
+  become: true
+  when: nexus_manage_packages | bool
+
+- name: Install Java package
+  ansible.builtin.dnf:
+    name: "{{ nexus_java_package }}"
+    state: present
+  become: true
+  when: nexus_manage_java | bool
 
 - name: Create Nexus group
-  group: name={{ nexus_os_group }} state=present
+  ansible.builtin.group:
+    name: "{{ nexus_group }}"
+    system: true
+    state: present
   become: true
 
 - name: Create Nexus user
-  user: name={{ nexus_os_user }} group={{ nexus_os_group }} shell={{ nexus_os_user_shell }} state=present
+  ansible.builtin.user:
+    name: "{{ nexus_user }}"
+    group: "{{ nexus_group }}"
+    shell: "{{ nexus_user_shell }}"
+    home: "{{ nexus_data_dir }}"
+    create_home: false
+    system: true
+    state: present
   become: true
 
-- name: Create Nexus installation directory
-  file:
-    path={{ nexus_installation_dir }}
-    state=directory
+- name: Create Nexus directories
+  ansible.builtin.file:
+    path: "{{ item.path }}"
+    state: directory
+    owner: "{{ item.owner | default(nexus_user) }}"
+    group: "{{ item.group | default(nexus_group) }}"
+    mode: "{{ item.mode }}"
+  become: true
+  loop:
+    - path: "{{ nexus_install_dir }}"
+      owner: root
+      group: root
+      mode: "0755"
+    - path: "{{ nexus_data_dir }}"
+      mode: "0750"
+    - path: "{{ nexus_data_dir }}/etc"
+      mode: "0750"
+    - path: "{{ nexus_data_dir }}/log"
+      mode: "0750"
+    - path: "{{ nexus_tmp_dir }}"
+      mode: "0750"
+
+- name: Download Nexus Repository
+  ansible.builtin.get_url:
+    url: "{{ nexus_download_url }}"
+    dest: "{{ nexus_download_dir }}/{{ nexus_package }}"
+    checksum: "{{ nexus_download_checksum | default(omit, true) }}"
+    owner: root
+    group: root
+    mode: "0644"
+    validate_certs: "{{ nexus_validate_certs }}"
   become: true
 
-- name: Download Nexus package
-  get_url: url="http://download.sonatype.com/nexus/oss/{{ nexus_package }}" dest={{ nexus_download_dir }}/{{ nexus_package }}
-  become: false
-
-- name: Unpack Nexus package
-  unarchive:
-    src={{ nexus_download_dir }}/{{ nexus_package }}
-    dest={{ nexus_installation_dir }}
-    creates={{ nexus_installation_dir }}/nexus-{{ nexus_version }}
-    force=no
-    copy=false
-    owner={{ nexus_os_user }}
-    group={{ nexus_os_group }}
-    mode=0755
-
-- name: Create symlink nexus-latest
-  file:
-    src={{ nexus_installation_dir }}/nexus-{{ nexus_version }}
-    dest={{ nexus_installation_dir }}/nexus-latest
-    owner={{ nexus_os_user }}
-    group={{ nexus_os_group }}
-    state=link
-
-- name: Check if sonatype working directory exists
-  stat: path={{ nexus_installation_dir }}/sonatype-work
-  register: s_w
-
-- name: Move existing sonatype working directory into specified working dir
-  command: mv {{ nexus_installation_dir }}/sonatype-work {{ nexus_working_dir }}
-  when: s_w.stat.exists
-
-- name: Set permissions and ownership on Nexus installation directory
-  file:
-    path={{ nexus_installation_dir }}/{{ nexus_package }}
-    state=directory
-    owner={{ nexus_os_user }}
-    group={{ nexus_os_group }}
-    mode=0755
-    recurse=true
-
-- name: Create Nexus directory for PID file
-  file:
-    path=/var/run/nexus
-    owner={{ nexus_os_user }}
-    group={{ nexus_os_group }}
-    state=directory
-
-- name: Configure port in nexus.properties
-  lineinfile:
-    dest={{ nexus_installation_dir }}/nexus-{{ nexus_version }}/conf/nexus.properties
-    line=application-port={{ nexus_port }}
-    regexp=application-port=.*
-    state=present
-  notify:
-    - 'restart nexus'
-
-- name: Configure workdir in nexus.properties
-  lineinfile:
-    dest={{ nexus_installation_dir }}/nexus-{{ nexus_version }}/conf/nexus.properties
-    line=nexus-work={{ nexus_working_dir }}
-    regexp=nexus-work=.*
-    state=present
-  notify:
-    - 'restart nexus'
-
-- name: Copy the /etc/init.d/nexus file
-  template: src=init-nexus.j2 dest=/etc/init.d/nexus owner=root group=root mode=0755 backup=yes
-  notify:
-    - 'restart nexus'
-
-- name: Register service with chkconfig system
-  service: name=nexus enabled=yes
-
-- name: Set service start/stop order
+- name: Extract Nexus Repository
+  ansible.builtin.unarchive:
+    src: "{{ nexus_download_dir }}/{{ nexus_package }}"
+    dest: "{{ nexus_install_dir }}"
+    remote_src: true
+    creates: "{{ nexus_install_dir }}/{{ nexus_edition }}-{{ nexus_version }}"
+    owner: root
+    group: root
   become: true
-  command: chkconfig nexus reset
+
+- name: Set Nexus installation ownership
+  ansible.builtin.file:
+    path: "{{ nexus_install_dir }}/{{ nexus_edition }}-{{ nexus_version }}"
+    state: directory
+    owner: root
+    group: root
+    mode: "0755"
+    recurse: true
+  become: true
+
+- name: Link current Nexus installation
+  ansible.builtin.file:
+    src: "{{ nexus_install_dir }}/{{ nexus_edition }}-{{ nexus_version }}"
+    dest: "{{ nexus_current_path }}"
+    state: link
+    owner: root
+    group: root
+    force: true
+  become: true
+  notify:
+    - Restart nexus
+
+- name: Configure Nexus default properties
+  ansible.builtin.template:
+    src: nexus-default.properties.j2
+    dest: "{{ nexus_current_path }}/etc/nexus-default.properties"
+    owner: root
+    group: root
+    mode: "0644"
+  become: true
+  notify:
+    - Restart nexus
+
+- name: Configure Nexus JVM options
+  ansible.builtin.template:
+    src: nexus.vmoptions.j2
+    dest: "{{ nexus_current_path }}/bin/nexus.vmoptions"
+    owner: root
+    group: root
+    mode: "0644"
+  become: true
+  notify:
+    - Restart nexus
+
+- name: Install Nexus systemd unit
+  ansible.builtin.template:
+    src: nexus.service.j2
+    dest: "/etc/systemd/system/{{ nexus_service_name }}.service"
+    owner: root
+    group: root
+    mode: "0644"
+  become: true
+  notify:
+    - Reload systemd
+    - Restart nexus
+
+- name: Start and enable Nexus
+  ansible.builtin.systemd:
+    name: "{{ nexus_service_name }}"
+    enabled: true
+    state: started
+    daemon_reload: true
+  become: true
+
+- name: Wait for Nexus HTTP endpoint
+  ansible.builtin.uri:
+    url: "http://127.0.0.1:{{ nexus_port }}{{ nexus_context_path }}"
+    status_code:
+      - 200
+      - 302
+      - 401
+    validate_certs: false
+  register: nexus_http_check
+  until: nexus_http_check.status in [200, 302, 401]
+  retries: "{{ (nexus_wait_timeout / 10) | int }}"
+  delay: 10
+  when: nexus_wait_for_start | bool

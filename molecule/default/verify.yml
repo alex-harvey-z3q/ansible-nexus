@@ -1,0 +1,43 @@
+---
+- name: Verify
+  hosts: all
+  become: true
+  tasks:
+    - name: Gather service facts
+      ansible.builtin.service_facts:
+
+    - name: Assert Nexus service is installed
+      ansible.builtin.assert:
+        that:
+          - "'nexus.service' in ansible_facts.services"
+
+    - name: Check Nexus systemd unit
+      ansible.builtin.stat:
+        path: /etc/systemd/system/nexus.service
+      register: nexus_unit
+
+    - name: Assert Nexus unit exists
+      ansible.builtin.assert:
+        that:
+          - nexus_unit.stat.exists
+
+    - name: Check Nexus installation link
+      ansible.builtin.stat:
+        path: /opt/nexus/current
+      register: nexus_current
+
+    - name: Assert Nexus current symlink exists
+      ansible.builtin.assert:
+        that:
+          - nexus_current.stat.islnk
+
+    - name: Read Nexus default properties
+      ansible.builtin.slurp:
+        src: /opt/nexus/current/etc/nexus-default.properties
+      register: nexus_default_properties
+
+    - name: Assert Nexus default properties are rendered
+      ansible.builtin.assert:
+        that:
+          - "'application-port=8081' in (nexus_default_properties.content | b64decode)"
+          - "'nexus-context-path=/' in (nexus_default_properties.content | b64decode)"

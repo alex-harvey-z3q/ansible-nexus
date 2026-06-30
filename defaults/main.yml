@@ -1,10 +1,69 @@
 ---
-nexus_download_dir: '/tmp'
-nexus_version: '2.13.0-01'
-nexus_package: 'nexus-{{ nexus_version }}-bundle.tar.gz'
-nexus_installation_dir: '/usr/share'
-nexus_working_dir: '/var/nexus'
-nexus_port: 8082
-nexus_os_user: 'nexus'
-nexus_os_group: 'nexus'
-nexus_os_user_shell: '/bin/bash'
+nexus_version: "3.93.2-01"
+nexus_edition: "nexus"
+
+nexus_download_base_url: "https://download.sonatype.com/nexus/3"
+nexus_architecture_map:
+  x86_64: "x86_64"
+  aarch64: "aarch_64"
+  arm64: "aarch_64"
+nexus_architecture: "{{ nexus_architecture_map.get(ansible_architecture, ansible_architecture) }}"
+nexus_package: "{{ nexus_edition }}-{{ nexus_version }}-linux-{{ nexus_architecture }}.tar.gz"
+nexus_download_url: "{{ nexus_download_base_url }}/{{ nexus_package }}"
+nexus_download_checksum_map:
+  x86_64: "sha256:8dda14aef3702546de81a3bd1d62cee9803204645ed5ffaceb17c8e9e9055fa2"
+  aarch_64: "sha256:c50a25e05d6e8222c6d847a82467e7c4bc5621442cfaadc9d07e7a424673025f"
+nexus_download_checksum: "{{ nexus_download_checksum_map.get(nexus_architecture, '') }}"
+nexus_download_dir: "/var/tmp"
+
+nexus_install_dir: "/opt/nexus"
+nexus_current_path: "{{ nexus_install_dir }}/current"
+nexus_data_dir: "/var/sonatype-work/nexus3"
+nexus_tmp_dir: "/var/tmp/nexus"
+
+nexus_user: "nexus"
+nexus_group: "nexus"
+nexus_user_shell: "/sbin/nologin"
+nexus_service_name: "nexus"
+
+nexus_host: "0.0.0.0"
+nexus_port: 8081
+nexus_context_path: "/"
+
+nexus_manage_packages: true
+nexus_packages:
+  - gzip
+  - procps-ng
+  - tar
+
+nexus_manage_java: false
+nexus_java_package: "java-17-openjdk-headless"
+nexus_java_home: ""
+
+nexus_limit_nofile: 65536
+nexus_start_timeout: 600
+nexus_stop_timeout: 120
+nexus_restart_on_failure: true
+
+nexus_vmoptions:
+  - "-Xms2703m"
+  - "-Xmx2703m"
+  - "-XX:MaxDirectMemorySize=2703m"
+  - "-XX:+UnlockDiagnosticVMOptions"
+  - "-XX:+UnsyncloadClass"
+  - "-XX:+LogVMOutput"
+  - "-XX:LogFile={{ nexus_data_dir }}/log/jvm.log"
+  - "-XX:-OmitStackTraceInFastThrow"
+  - "-Djava.net.preferIPv4Stack=true"
+  - "-Dkaraf.home={{ nexus_current_path }}"
+  - "-Dkaraf.base={{ nexus_current_path }}"
+  - "-Dkaraf.etc={{ nexus_current_path }}/etc/karaf"
+  - "-Djava.util.logging.config.file={{ nexus_current_path }}/etc/karaf/java.util.logging.properties"
+  - "-Dkaraf.data={{ nexus_data_dir }}"
+  - "-Dkaraf.log={{ nexus_data_dir }}/log"
+  - "-Djava.io.tmpdir={{ nexus_tmp_dir }}"
+  - "-Dkaraf.startLocalConsole=false"
+
+nexus_validate_certs: true
+nexus_wait_for_start: true
+nexus_wait_timeout: 600

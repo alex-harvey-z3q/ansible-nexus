@@ -1,3 +1,21 @@
 ---
-dependencies:
-  - { role: geerlingguy.java }
+galaxy_info:
+  role_name: nexus
+  namespace: alexharvey
+  author: Alex Harvey
+  description: Install Sonatype Nexus Repository 3 on Enterprise Linux.
+  company: ""
+  license: MIT
+  min_ansible_version: "2.15"
+  platforms:
+    - name: EL
+      versions:
+        - "9"
+        - "10"
+  galaxy_tags:
+    - nexus
+    - sonatype
+    - repository
+    - artifacts
+    - el
+dependencies: []

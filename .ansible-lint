@@ -1,0 +1,10 @@
+---
+profile: production
+exclude_paths:
+  - .cache/
+  - .github/
+  - .kitchen/
+  - molecule/default/.molecule/
+skip_list:
+  - role-name[path]
+  - var-naming[no-role-prefix]

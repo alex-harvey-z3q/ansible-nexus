@@ -1,0 +1,28 @@
+[Unit]
+Description=Sonatype Nexus Repository
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User={{ nexus_user }}
+Group={{ nexus_group }}
+WorkingDirectory={{ nexus_current_path }}
+{% if nexus_java_home | length > 0 %}
+Environment="INSTALL4J_JAVA_HOME_OVERRIDE={{ nexus_java_home }}"
+{% endif %}
+ExecStart={{ nexus_current_path }}/bin/nexus run
+ExecStop={{ nexus_current_path }}/bin/nexus stop
+LimitNOFILE={{ nexus_limit_nofile }}
+TimeoutStartSec={{ nexus_start_timeout }}
+TimeoutStopSec={{ nexus_stop_timeout }}
+{% if nexus_restart_on_failure | bool %}
+Restart=on-failure
+RestartSec=15
+{% endif %}
+SuccessExitStatus=143
+NoNewPrivileges=true
+PrivateTmp=true
+
+[Install]
+WantedBy=multi-user.target

@@ -1,46 +1,87 @@
-# Ansible Role: Nexus
+# Ansible Role: Nexus Repository
 
-Installs Sonatype Nexus on Red Hat-based platforms.
+Installs Sonatype Nexus Repository 3 on systemd-based Enterprise Linux hosts.
+
+This role has been modernised for the EL 9/10 era. It no longer installs Nexus
+Repository 2, no longer uses SysV init scripts, and no longer depends on the
+legacy `geerlingguy.java` role.
 
 ## Requirements
 
-This role requires the `geerlingguy.java` role.
+- Ansible 2.15 or newer.
+- Enterprise Linux 9 or 10 family host.
+- `systemd`.
+- x86-64 or AArch64 architecture.
+
+The Sonatype Linux archives include a runtime for supported platforms. If you
+want to install and use an operating system Java package instead, set
+`nexus_manage_java: true` and configure `nexus_java_package` and
+`nexus_java_home`.
 
 ## Role Variables
 
-See also `defaults/main.yml`.
+See `defaults/main.yml` for the full list.
 
-* `nexus_download_dir`: download path on the control machine that will be used. Defaults to `/tmp`.
-* `nexus_version`: Nexus version to be installed. Defaults to `2.13.0-01`.
-* `nexus_installation_dir`: installation prefix that will be used on installation hosts. Defaults to `/usr/share`.
-* `nexus_work_dir`: working directory, a.k.a. sonatype-work. Defaults to `/var/nexus`.
-* `nexus_port`: TCP port. Defaults to `8082`.
-* `nexus_os_user`: The Nexus user, which will be created by this role. Defaults to `nexus`.
-* `nexus_os_group`: The Nexus user's group, which will be created by this role. Defaults to `nexus`.
-* `nexus_os_shell`: The Nexus user's shell. Defaults to `/bin/bash`.
+| Variable | Default | Description |
+| --- | --- | --- |
+| `nexus_version` | `3.93.2-01` | Nexus Repository version, including Sonatype build suffix. |
+| `nexus_download_url` | derived | Archive URL for the selected version and architecture. |
+| `nexus_download_checksum` | derived | Checksum for `get_url`, for example `sha256:<digest>`. |
+| `nexus_install_dir` | `/opt/nexus` | Parent directory for versioned Nexus installations. |
+| `nexus_current_path` | `/opt/nexus/current` | Stable symlink to the active install. |
+| `nexus_data_dir` | `/var/sonatype-work/nexus3` | Nexus data directory. |
+| `nexus_user` | `nexus` | System user used to run Nexus. |
+| `nexus_group` | `nexus` | System group used to run Nexus. |
+| `nexus_host` | `0.0.0.0` | HTTP bind address. |
+| `nexus_port` | `8081` | HTTP port. |
+| `nexus_context_path` | `/` | Nexus web context path. |
+| `nexus_manage_java` | `false` | Install an OS Java package. |
+| `nexus_java_package` | `java-17-openjdk-headless` | Java package to install when enabled. |
+| `nexus_wait_for_start` | `true` | Wait for the local HTTP endpoint after starting the service. |
 
 ## Example Playbook
 
-Including an example of how to use your role (for instance, with variables passed in as parameters) is always nice for users too:
+```yaml
+---
+- name: Install Nexus Repository
+  hosts: nexus
+  become: true
+  roles:
+    - role: alexharvey.nexus
+      nexus_download_checksum: "sha256:<digest>"
+```
 
-    - hosts: servers
-      roles:
-         - { role: alexharvey.nexus, nexus_installation_dir: '/opt' }
+## Testing
+
+Install modern Ansible role tooling, then run:
+
+```console
+python3 -m pip install -r requirements-dev.txt
+ansible-lint
+yamllint .
+molecule test
+```
+
+The Molecule scenario targets Rocky Linux 9 in Docker and uses systemd inside
+the container. EL 10 support is declared in role metadata and should be added to
+the Molecule matrix once stable EL 10 container images are available in your
+chosen registry.
+
+## Migration Notes
+
+This is a breaking modernization from the old Nexus Repository 2 role:
+
+- Nexus Repository 2 support has been removed.
+- SysV init and `chkconfig` support have been removed.
+- The service is managed by a native `systemd` unit.
+- Default install/data paths now follow Nexus Repository 3 conventions.
+- Variables have been renamed from the old `nexus_os_*` and
+  `nexus_working_dir` names.
+
+Before applying this role to an existing Nexus Repository 2 host, follow
+Sonatype's Nexus Repository 2 to 3 migration guidance and test the migration on
+a copy of production data.
 
 ## License
 
 MIT.
-
-## Acknowledgements
-
-This module was forked from `jhinrichsen.nexus` which the author acknowledges as derived from a playbook by Alexander Ramos Jardim.
-
-## Contributing
-
-To run the tests:
-
-    $ gem install bundler
-    $ bundle install
-    $ bundle exec kitchen test default-centos-72
-
-Requires Docker.

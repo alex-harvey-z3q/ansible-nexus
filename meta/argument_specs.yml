@@ -1,0 +1,39 @@
+---
+argument_specs:
+  main:
+    short_description: Install Sonatype Nexus Repository 3.
+    options:
+      nexus_version:
+        type: str
+        default: "3.93.2-01"
+        description: Nexus Repository version including Sonatype build suffix.
+      nexus_download_url:
+        type: str
+        description: Full URL for the Nexus Repository archive.
+      nexus_download_checksum:
+        type: str
+        description: Checksum passed to get_url, for example sha256:<digest>.
+      nexus_install_dir:
+        type: path
+        default: /opt/nexus
+        description: Parent directory for versioned Nexus installations.
+      nexus_data_dir:
+        type: path
+        default: /var/sonatype-work/nexus3
+        description: Nexus Repository data directory.
+      nexus_user:
+        type: str
+        default: nexus
+        description: System user used to run Nexus.
+      nexus_group:
+        type: str
+        default: nexus
+        description: System group used to run Nexus.
+      nexus_port:
+        type: int
+        default: 8081
+        description: HTTP port for Nexus Repository.
+      nexus_host:
+        type: str
+        default: 0.0.0.0
+        description: HTTP bind address for Nexus Repository.
