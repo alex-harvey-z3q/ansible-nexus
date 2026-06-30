@@ -25,7 +25,6 @@ jobs:
       ANSIBLE_HOME: "${{ github.workspace }}/.ansible"
       ANSIBLE_LOCAL_TEMP: /tmp/ansible-local
       ANSIBLE_REMOTE_TEMP: /tmp/ansible-remote
-      ANSIBLE_ROLES_PATH: ..
       PY_COLORS: "1"
     steps:
       - name: Check out repository
