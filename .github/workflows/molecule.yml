@@ -23,8 +23,8 @@ jobs:
     env:
       ANSIBLE_FORCE_COLOR: "1"
       ANSIBLE_HOME: "${{ github.workspace }}/.ansible"
-      ANSIBLE_LOCAL_TEMP: "${{ runner.temp }}/ansible-local"
-      ANSIBLE_REMOTE_TEMP: "${{ runner.temp }}/ansible-remote"
+      ANSIBLE_LOCAL_TEMP: /tmp/ansible-local
+      ANSIBLE_REMOTE_TEMP: /tmp/ansible-remote
       PY_COLORS: "1"
     steps:
       - name: Check out repository
