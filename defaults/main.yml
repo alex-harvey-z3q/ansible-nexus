@@ -25,6 +25,7 @@ nexus_user: "nexus"
 nexus_group: "nexus"
 nexus_user_shell: "/sbin/nologin"
 nexus_service_name: "nexus"
+nexus_become: true
 
 nexus_host: "0.0.0.0"
 nexus_port: 8081

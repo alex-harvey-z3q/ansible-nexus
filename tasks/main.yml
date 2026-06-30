@@ -15,14 +15,14 @@
   ansible.builtin.dnf:
     name: "{{ nexus_packages }}"
     state: present
-  become: true
+  become: "{{ nexus_become }}"
   when: nexus_manage_packages | bool
 
 - name: Install Java package
   ansible.builtin.dnf:
     name: "{{ nexus_java_package }}"
     state: present
-  become: true
+  become: "{{ nexus_become }}"
   when: nexus_manage_java | bool
 
 - name: Create Nexus group
@@ -30,7 +30,7 @@
     name: "{{ nexus_group }}"
     system: true
     state: present
-  become: true
+  become: "{{ nexus_become }}"
 
 - name: Create Nexus user
   ansible.builtin.user:
@@ -41,7 +41,7 @@
     create_home: false
     system: true
     state: present
-  become: true
+  become: "{{ nexus_become }}"
 
 - name: Create Nexus directories
   ansible.builtin.file:
@@ -50,7 +50,7 @@
     owner: "{{ item.owner | default(nexus_user) }}"
     group: "{{ item.group | default(nexus_group) }}"
     mode: "{{ item.mode }}"
-  become: true
+  become: "{{ nexus_become }}"
   loop:
     - path: "{{ nexus_install_dir }}"
       owner: root
@@ -74,7 +74,7 @@
     group: root
     mode: "0644"
     validate_certs: "{{ nexus_validate_certs }}"
-  become: true
+  become: "{{ nexus_become }}"
 
 - name: Extract Nexus Repository
   ansible.builtin.unarchive:
@@ -84,7 +84,7 @@
     creates: "{{ nexus_install_dir }}/{{ nexus_edition }}-{{ nexus_version }}"
     owner: root
     group: root
-  become: true
+  become: "{{ nexus_become }}"
 
 - name: Set Nexus installation ownership
   ansible.builtin.file:
@@ -94,7 +94,7 @@
     group: root
     mode: "0755"
     recurse: true
-  become: true
+  become: "{{ nexus_become }}"
 
 - name: Link current Nexus installation
   ansible.builtin.file:
@@ -104,7 +104,7 @@
     owner: root
     group: root
     force: true
-  become: true
+  become: "{{ nexus_become }}"
   notify:
     - Restart nexus
 
@@ -115,7 +115,7 @@
     owner: root
     group: root
     mode: "0644"
-  become: true
+  become: "{{ nexus_become }}"
   notify:
     - Restart nexus
 
@@ -126,7 +126,7 @@
     owner: root
     group: root
     mode: "0644"
-  become: true
+  become: "{{ nexus_become }}"
   notify:
     - Restart nexus
 
@@ -137,7 +137,7 @@
     owner: root
     group: root
     mode: "0644"
-  become: true
+  become: "{{ nexus_become }}"
   notify:
     - Reload systemd
     - Restart nexus
@@ -148,7 +148,7 @@
     enabled: true
     state: started
     daemon_reload: true
-  become: true
+  become: "{{ nexus_become }}"
 
 - name: Wait for Nexus HTTP endpoint
   ansible.builtin.uri:

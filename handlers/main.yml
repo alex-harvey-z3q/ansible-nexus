@@ -2,10 +2,10 @@
 - name: Reload systemd
   ansible.builtin.systemd:
     daemon_reload: true
-  become: true
+  become: "{{ nexus_become }}"
 
 - name: Restart nexus
   ansible.builtin.systemd:
     name: "{{ nexus_service_name }}"
     state: restarted
-  become: true
+  become: "{{ nexus_become }}"

@@ -19,6 +19,7 @@ provisioner:
   inventory:
     group_vars:
       all:
+        nexus_become: false
         nexus_wait_for_start: false
 verifier:
   name: ansible

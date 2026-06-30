@@ -32,6 +32,7 @@ See `defaults/main.yml` for the full list.
 | `nexus_data_dir` | `/var/sonatype-work/nexus3` | Nexus data directory. |
 | `nexus_user` | `nexus` | System user used to run Nexus. |
 | `nexus_group` | `nexus` | System group used to run Nexus. |
+| `nexus_become` | `true` | Use privilege escalation for tasks that manage system state. |
 | `nexus_host` | `0.0.0.0` | HTTP bind address. |
 | `nexus_port` | `8081` | HTTP port. |
 | `nexus_context_path` | `/` | Nexus web context path. |
