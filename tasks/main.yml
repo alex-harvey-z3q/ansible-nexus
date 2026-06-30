@@ -86,14 +86,13 @@
     group: root
   become: "{{ nexus_become }}"
 
-- name: Set Nexus installation ownership
+- name: Set Nexus installation directory ownership
   ansible.builtin.file:
     path: "{{ nexus_install_dir }}/{{ nexus_edition }}-{{ nexus_version }}"
     state: directory
     owner: root
     group: root
     mode: "0755"
-    recurse: true
   become: "{{ nexus_become }}"
 
 - name: Link current Nexus installation
@@ -159,6 +158,7 @@
       - 401
     validate_certs: false
   register: nexus_http_check
+  changed_when: false
   until: nexus_http_check.status in [200, 302, 401]
   retries: "{{ (nexus_wait_timeout / 10) | int }}"
   delay: 10
