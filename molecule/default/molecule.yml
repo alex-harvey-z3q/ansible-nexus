@@ -16,6 +16,8 @@ provisioner:
   name: ansible
   playbooks:
     converge: converge.yml
+  env:
+    ANSIBLE_ROLES_PATH: ..
   inventory:
     group_vars:
       all:
