@@ -1,0 +1,53 @@
+---
+name: Molecule
+
+"on":
+  pull_request:
+  push:
+    branches:
+      - master
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: molecule-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  molecule:
+    name: Molecule default scenario
+    runs-on: ubuntu-latest
+    env:
+      ANSIBLE_FORCE_COLOR: "1"
+      ANSIBLE_HOME: "${{ github.workspace }}/.ansible"
+      ANSIBLE_LOCAL_TEMP: "${{ runner.temp }}/ansible-local"
+      ANSIBLE_REMOTE_TEMP: "${{ runner.temp }}/ansible-remote"
+      PY_COLORS: "1"
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: requirements-dev.txt
+
+      - name: Install development dependencies
+        run: python -m pip install -r requirements-dev.txt
+
+      - name: Show tool versions
+        run: |
+          ansible --version
+          molecule --version
+          docker version
+
+      - name: Pull Molecule image
+        run: docker pull rockylinux:9
+
+      - name: Run Molecule test
+        run: molecule test
