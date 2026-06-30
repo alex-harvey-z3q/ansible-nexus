@@ -5,8 +5,8 @@ driver:
   name: docker
 platforms:
   - name: nexus-el9
-    image: rockylinux:9
-    command: /usr/sbin/init
+    image: geerlingguy/docker-rockylinux9-ansible:latest
+    command: /usr/lib/systemd/systemd
     privileged: true
     cgroupns_mode: host
     volumes:
