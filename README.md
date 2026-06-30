@@ -67,21 +67,6 @@ the container. EL 10 support is declared in role metadata and should be added to
 the Molecule matrix once stable EL 10 container images are available in your
 chosen registry.
 
-## Migration Notes
-
-This is a breaking modernization from the old Nexus Repository 2 role:
-
-- Nexus Repository 2 support has been removed.
-- SysV init and `chkconfig` support have been removed.
-- The service is managed by a native `systemd` unit.
-- Default install/data paths now follow Nexus Repository 3 conventions.
-- Variables have been renamed from the old `nexus_os_*` and
-  `nexus_working_dir` names.
-
-Before applying this role to an existing Nexus Repository 2 host, follow
-Sonatype's Nexus Repository 2 to 3 migration guidance and test the migration on
-a copy of production data.
-
 ## License
 
 MIT.
