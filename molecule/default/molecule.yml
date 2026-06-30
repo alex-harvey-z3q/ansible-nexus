@@ -16,8 +16,9 @@ provisioner:
   name: ansible
   playbooks:
     converge: converge.yml
-  env:
-    ANSIBLE_ROLES_PATH: ..
+  config_options:
+    defaults:
+      roles_path: "${MOLECULE_PROJECT_DIRECTORY}/.."
   inventory:
     group_vars:
       all:
